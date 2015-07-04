@@ -1,3 +1,5 @@
 songs (copy)/
 songs/*
 !songs/*.txt
+*.pyc
+*.db
