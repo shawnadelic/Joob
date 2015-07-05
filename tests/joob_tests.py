@@ -1,11 +1,7 @@
-from nose.tools import *
+import os
+import unittest
 import joob
 
-def setup():
-    print "SETUP"
-
-def teardown():
-    print "TEARDOWN"
-
-def test_basic():
-    print "I RAN"
+class JoobClass(unittest.TestCase):
+    def test_one(self):
+        self.assertEqual(self,self)
