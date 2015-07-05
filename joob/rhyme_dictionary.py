@@ -5,27 +5,31 @@ import sqlite3
 import json
 
 class RhymeDictionary(object):
-    def __init__(self,db_file = None, syllable_trim = 2,match_trim = 5):
+    def __init__(self, db_file, syllable_trim = 2, match_trim = 5):
         self.connection = None
-        if db_file:
-            self.connection = sqlite3.connect(db_file)
-            self.cursor = self.connection.cursor()
-        else:
-            print "Building rhyme dictionary"
-            self.syllable_trim = syllable_trim
-            self.match_trim = match_trim
-            self.cmu_dict = dict()
-            self.pronunciation_dict = dict()
-            self.matching_syllables_dict = dict()
-            self.matching_syllables_by_length_dict = dict()
-            self.matching_syllables_by_word_dict = dict()
-            self.build_cmu_dict()
-            self.build_pronunciation_dict()
-            self.build_matching_syllables_dict()
-            self.build_matching_syllables_by_word_dict()
-            print "Finished building rhyme dictionary"
+        try:
+            #self.connection = sqlite3.connect(db_file)
+            #self.cursor = self.connection.cursor()
+            pass
+        except:
+            pass
+            #print("Building rhyme dictionary")
+            #self.syllable_trim = syllable_trim
+            #self.match_trim = match_trim
+            #self.cmu_dict = dict()
+            #self.pronunciation_dict = dict()
+            #self.matching_syllables_dict = dict()
+            #self.matching_syllables_by_length_dict = dict()
+            #self.matching_syllables_by_word_dict = dict()
+            #self.build_cmu_dict()
+            #self.build_pronunciation_dict()
+            #self.build_matching_syllables_dict()
+            #self.build_matching_syllables_by_word_dict()
+            #self.write_to_db(db_file)
+            #print("Finished building rhyme dictionary")
     def __del__(self):
-        self.close_connection()
+        if self.connection:
+            self.close_connection()
     def __getitem__(self,key):
         result = self.get_all_rhymes(key)
         if result:
@@ -124,7 +128,6 @@ class RhymeDictionary(object):
         with open(filename,"wb") as output_file:
             for key in self.matching_syllables_by_word_dict:
                 output_file.write( str([key] + self.matching_syllables_by_word_dict[key]) )
-        #pickle.dump( self.matching_syllables_by_word_dict, open(filename,"wb"))
     def write_to_db(self,filename):
         connection = sqlite3.connect(filename)
         cursor = connection.cursor()
@@ -134,13 +137,13 @@ class RhymeDictionary(object):
             cursor.execute("INSERT INTO word_dict (word, matches) VALUES(?,?)",(word,json_string))
         connection.commit()
         connection.close()
-    def read_from_db(self,filename):
-        connection = sqlite3.connect(filename)
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM word_dict");
-        for row in cursor:
-            self.matching_syllables_by_word_dict[str(row[0])] = json.loads(row[1])
-        connection.close()
+#    def read_from_db(self,filename):
+#        connection = sqlite3.connect(filename)
+#        cursor = connection.cursor()
+#        cursor.execute("SELECT * FROM word_dict");
+#        for row in cursor:
+#            self.matching_syllables_by_word_dict[str(row[0])] = json.loads(row[1])
+#        connection.close()
     def close_connection(self):
         self.connection.close()
 
@@ -150,6 +153,5 @@ if __name__ == "__main__":
         word = str(raw_input("Enter a word to test: "))
         if word == "/quit":
             break
-        print rhyme_dict.get_all_rhymes(word)
-        print rhyme_dict.random(word)
-    #rhyme_dict.write_to_db("test.db")
+        #print rhyme_dict.get_all_rhymes(word)
+        #print rhyme_dict.random(word)
