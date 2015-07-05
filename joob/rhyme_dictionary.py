@@ -3,8 +3,19 @@ from nltk.corpus import wordnet
 import random
 import sqlite3
 import json
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 
-class RhymeDictionary(object):
+Base = declarative_base()
+
+engine = create_engine('sqlite:///test.db', echo=True)
+engine.connect()
+engine.execute("CREATE TABLE jerks ( id int )")
+
+class RhymeDictionary(Base):
+    __tablename__ = "rhyme_dict_entries"
+    id = Column(Integer, primary_key = True)
+
     def __init__(self, db_file, syllable_trim = 2, match_trim = 5):
         self.connection = None
         try:
@@ -27,9 +38,9 @@ class RhymeDictionary(object):
             #self.build_matching_syllables_by_word_dict()
             #self.write_to_db(db_file)
             #print("Finished building rhyme dictionary")
-    def __del__(self):
-        if self.connection:
-            self.close_connection()
+    #def __del__(self):
+    #    if self.connection:
+    #        self.close_connection()
     def __getitem__(self,key):
         result = self.get_all_rhymes(key)
         if result:
@@ -137,13 +148,13 @@ class RhymeDictionary(object):
             cursor.execute("INSERT INTO word_dict (word, matches) VALUES(?,?)",(word,json_string))
         connection.commit()
         connection.close()
-#    def read_from_db(self,filename):
-#        connection = sqlite3.connect(filename)
-#        cursor = connection.cursor()
-#        cursor.execute("SELECT * FROM word_dict");
-#        for row in cursor:
-#            self.matching_syllables_by_word_dict[str(row[0])] = json.loads(row[1])
-#        connection.close()
+    def read_from_db(self,filename):
+        connection = sqlite3.connect(filename)
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM word_dict");
+        for row in cursor:
+            self.matching_syllables_by_word_dict[str(row[0])] = json.loads(row[1])
+        connection.close()
     def close_connection(self):
         self.connection.close()
 
