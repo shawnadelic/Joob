@@ -5,12 +5,16 @@ import sqlite3
 import json
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 
 engine = create_engine('sqlite:///test.db', echo=True)
 engine.connect()
-engine.execute("CREATE TABLE jerks ( id int )")
+
+Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
+session = Session()
 
 class RhymeDictionary(Base):
     __tablename__ = "rhyme_dict_entries"
