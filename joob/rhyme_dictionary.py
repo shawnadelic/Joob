@@ -1,26 +1,51 @@
 from nltk.corpus import cmudict as cmu
 from nltk.corpus import wordnet
+import os.path
 import random
 import sqlite3
 import json
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, Table, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import relationship, sessionmaker
 
 Base = declarative_base()
 
-engine = create_engine('sqlite:///test.db', echo=True)
-engine.connect()
+rhyme_table = Table('rhyme', Base.metadata,
+    Column('left_word', String, ForeignKey('entry.word'), primary_key=True),
+    Column('right_word', String, ForeignKey('entry.word'), primary_key=True)
+)
 
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-session = Session()
+class Entry(Base):
+    __tablename__ = "entry"
+    word = Column(String, primary_key = True)
+    right_nodes = relationship("Entry", secondary=rhyme_table,
+        primaryjoin=word==rhyme_table.c.left_word,
+        secondaryjoin=word==rhyme_table.c.right_word,
+        backref="left_words")
 
-class RhymeDictionary(Base):
+class RhymeDictionary(object):
+    def __init__(self, db_file, syllable_trim=2, match_trim=5):
+        database_exists = os.path.isfile(db_file)
+        engine = create_engine('sqlite:///' + db_file, echo=True)
+        engine.connect()
+    
+        # Check if database exists, otherwise define it
+        if not database_exists:
+            Base.metadata.create_all(engine)
+
+        Session = sessionmaker(bind=engine)
+        session = Session()
+
+class RhymeDictionary2():
     __tablename__ = "rhyme_dict_entries"
     id = Column(Integer, primary_key = True)
 
     def __init__(self, db_file, syllable_trim = 2, match_trim = 5):
+        engine = create_engine('sqlite:///' + db_file, echo=True)
+        engine.connect()
+        Base.metadata.create_all(engine)
+        Session = sessionmaker(bind=engine)
+        session = Session()
         self.connection = None
         try:
             #self.connection = sqlite3.connect(db_file)
