@@ -95,8 +95,6 @@ class RhymeDictionary(object):
     def random_rhyme(self, word):
         all_rhymes = self.all_rhymes(word)
         try:
-            print self.rhyme_dict[word]
-            print all_rhymes
             return random.choice(all_rhymes)
         except IndexError:
             return None

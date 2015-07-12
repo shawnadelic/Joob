@@ -8,3 +8,7 @@ class JoobClass(unittest.TestCase):
         self.assertEqual(self.rhyme_dict.a, "No")
     def test_one(self):
         self.assertEqual(self,self)
+
+# Tests
+# beige - Valid word with no rhymes
+# comically - Valid word with multiple pronunciations
