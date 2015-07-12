@@ -1,3 +1,4 @@
 joob/songs/*
 *.pyc
 *.db
+*.swp

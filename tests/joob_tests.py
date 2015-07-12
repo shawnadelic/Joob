@@ -12,3 +12,6 @@ class JoobClass(unittest.TestCase):
 # Tests
 # beige - Valid word with no rhymes
 # comically - Valid word with multiple pronunciations
+# Test word with no other rhymes (beige)
+# Test word with numerous pronunciations (comically)
+# Test that words don't return themselves (jew)
