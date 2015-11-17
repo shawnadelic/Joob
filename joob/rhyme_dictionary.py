@@ -1,11 +1,28 @@
-import os.path
-import random
+#######################################################################
+#                                                                     #
+#  joob - a lyric generator                                           #
+#                                                                     #
+#######################################################################
+#                                                                     #
+#  www.github.com/shawnadelic/joob                                    #
+#                                                                     #
+#######################################################################
+
+# def build_database
+
+import os.path, imp, random, nltk
 from sqlalchemy import create_engine, Column, Integer, String, Table, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from collections import defaultdict
-from nltk.corpus import cmudict as cmu
 
+if "hey" == "hey":
+    from nltk.corpus import cmudict as cmu
+
+# Download correct corpus, if not already downloaded
+nltk.download('cmudict', quiet=True)
+
+# Define classes/objects for ORM
 Base = declarative_base()
 
 ClassMatchTable = Table('ClassMatch', Base.metadata,
@@ -33,6 +50,7 @@ class RhymeClass(Base):
 class RhymeDictionary(object):
 
     def __init__(self, db_file, syllable_trim=1, match_trim=5):
+
         # Set parameters and create dictionaries
         self.syllable_trim = syllable_trim
         self.rhyme_dict = dict()
