@@ -51,7 +51,7 @@ def get_rhyme_classes(pron_list, syllable_trim):
                 rhyme_classes.append(rhyme_class)
     return rhyme_classes
 
-def build_database(db_file, syllable_trim=1, match_trim=5):
+def build_database(db_file, syllable_trim=1):
     """
     Build the database from CMU dictionary
     """
@@ -119,6 +119,32 @@ def connect_to_database(db_file):
 
     return Session
 
+class RhymeDictionary(object):
+    def __init__(self, Session):
+        self.Session = Session
+    def get_rhymes(self, word, trim=2):
+        session = self.Session()
+        all_results = []
+        word_object = session.query(Entry).filter(Entry.word==word).first()
+        if word_object:
+            rhyme_classes = session.query(RhymeClass).filter(RhymeClass.word_matches.contains(word_object)).all()
+            rhyme_class_results = []
+            for rhyme_class in filter(lambda c: len(c.pron.split()) >= trim, sorted(rhyme_classes, key=lambda rhyme: len(rhyme.pron))):
+                word_matches = session.query(Entry).filter(Entry.class_matches.contains(rhyme_class))
+                rhyme_class_results.append(rhyme_class.pron)
+                word_results = []
+                for entry in word_matches:
+                    if entry.word != word:
+                        word_results.append(entry.word)
+                if word_results:
+                    rhyme_class_results.append(word_results)
+                if len(rhyme_class_results) > 1:
+                    all_results.append(rhyme_class_results)
+            session.close()
+        else:
+            session.close()
+        return all_results
+
 if __name__ == "__main__":
     db_file = sys.argv[1]
 
@@ -127,21 +153,13 @@ if __name__ == "__main__":
     else:
         Session = connect_to_database(db_file)
 
-    session = Session()
+    rhyme_dict = RhymeDictionary(Session)
 
     while True: 
         # SELECT entry_word FROM ClassMatch WHERE rhyme_class_pron IN
         #   (SELECT pron FROM RhymeClass INNER JOIN ClassMatch on RhymeClass.pron = ClassMatch.rhyme_class_pron WHERE ClassMatch.entry_word = 'testing');
         word = str(raw_input("Enter a word to test (or /quit to exit): "))
-        word_object = session.query(Entry).filter(Entry.word==word).first()
-        if word_object:
-            rhyme_classes = session.query(RhymeClass).filter(RhymeClass.word_matches.contains(word_object)).all()
-            for result in sorted(rhyme_classes, key=lambda rhyme: len(rhyme.pron)):
-                word_matches = session.query(Entry).filter(Entry.class_matches.contains(result))
-                print 
-                print result.pron
-                for word in word_matches:
-                    print word.word
+        print rhyme_dict.get_rhymes(word, 3)
         if word == "/quit":
             break
 
