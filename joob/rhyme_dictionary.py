@@ -120,16 +120,17 @@ def connect_to_database(db_file):
     return Session
 
 class RhymeDictionary(object):
-    def __init__(self, Session):
+    def __init__(self, Session, trim=2):
         self.Session = Session
-    def get_rhymes(self, word, trim=2):
+        self.trim = trim
+    def get_rhymes(self, word):
         session = self.Session()
         all_results = []
         word_object = session.query(Entry).filter(Entry.word==word).first()
         if word_object:
             rhyme_classes = session.query(RhymeClass).filter(RhymeClass.word_matches.contains(word_object)).all()
-            rhyme_class_results = []
-            for rhyme_class in filter(lambda c: len(c.pron.split()) >= trim, sorted(rhyme_classes, key=lambda rhyme: len(rhyme.pron))):
+            for rhyme_class in filter(lambda c: len(c.pron.split()) >= self.trim, sorted(rhyme_classes, key=lambda rhyme: len(rhyme.pron))):
+                rhyme_class_results = []
                 word_matches = session.query(Entry).filter(Entry.class_matches.contains(rhyme_class))
                 rhyme_class_results.append(rhyme_class.pron)
                 word_results = []
@@ -140,10 +141,18 @@ class RhymeDictionary(object):
                     rhyme_class_results.append(word_results)
                 if len(rhyme_class_results) > 1:
                     all_results.append(rhyme_class_results)
-            session.close()
-        else:
-            session.close()
+        session.close()
         return all_results
+    def random_rhyme(self, word):
+        all_rhymes = self.get_rhymes(word)
+        if all_rhymes:
+            random_rhyme_class = random.choice(all_rhymes)[1]
+            random_word = random.choice(random_rhyme_class)
+            return random_word
+        else:
+            return None
+    def rhyme_strength(self, left, right):
+        pass
 
 if __name__ == "__main__":
     db_file = sys.argv[1]
@@ -153,54 +162,10 @@ if __name__ == "__main__":
     else:
         Session = connect_to_database(db_file)
 
-    rhyme_dict = RhymeDictionary(Session)
+    rhyme_dict = RhymeDictionary(Session, 0)
 
     while True: 
-        # SELECT entry_word FROM ClassMatch WHERE rhyme_class_pron IN
-        #   (SELECT pron FROM RhymeClass INNER JOIN ClassMatch on RhymeClass.pron = ClassMatch.rhyme_class_pron WHERE ClassMatch.entry_word = 'testing');
         word = str(raw_input("Enter a word to test (or /quit to exit): "))
-        print rhyme_dict.get_rhymes(word, 3)
+        print rhyme_dict.random_rhyme(word)
         if word == "/quit":
-            break
-
-
-#     # Return all entries in reverse rhyme dictionary
-#     def get_rhymes(self, word):
-#         result = []
-#         try:
-#             rhyme_classes = sorted(self.rhyme_dict[word],
-#                     key=lambda pron_list: len(pron_list))
-#             for rhyme_class in rhyme_classes:
-#                 rhyme_list = self.reverse_rhyme_dict[rhyme_class]
-#                 if len(rhyme_list) > 1:
-#                     result.append([rhyme_class, rhyme_list])
-#         finally:
-#             return result
-# 
-#     def all_rhymes(self, word):
-#         result = []
-#         rhymes = self.get_rhymes(word)
-#         print rhymes
-#         for word, rhyme_list in rhymes:
-#             result += rhyme_list
-#         return result
-# 
-#     # Return random rhyme for word
-#     def random_rhyme(self, word):
-#         all_rhymes = self.all_rhymes(word)
-#         try:
-#             return random.choice(all_rhymes)
-#         except IndexError:
-#             return None
-# 
-#     # Generates all possible rhyme classes from pronuncation
-#     def get_rhyme_classes(self, pron_list):
-#         rhyme_classes = []
-#         for pron in pron_list: 
-#             for a in range(len(pron)):
-#                 rhyme_class = tuple(pron[a:])
-#                 if len(rhyme_class) > self.syllable_trim:
-#                     rhyme_classes.append(rhyme_class)
-#         return rhyme_classes
-# 
-# 
+            break 
