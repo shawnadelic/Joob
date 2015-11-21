@@ -3,21 +3,14 @@
 #  joob - a lyric generator                                           #
 #                                                                     #
 #######################################################################
-#                                                                     #
-#  www.github.com/shawnadelic/joob                                    #
-#                                                                     #
-#######################################################################
 
-# def build_database
-
-import random, nltk, sys, os
+import random, nltk, sys, os, re
 from sqlalchemy import create_engine, Column, Integer, String, Table, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from collections import defaultdict
 
 # Setup ORM
-
 Base = declarative_base()
 
 ClassMatchTable = Table('ClassMatch', Base.metadata,
@@ -43,6 +36,9 @@ class RhymeClass(Base):
         return "<RhymeClass(pron='%s')>" % self.pron
 
 def get_rhyme_classes(pron_list, syllable_trim):
+    """
+    Return a list of all "rhyme classes" for a given pronunciation
+    """
     rhyme_classes = []
     for pron in pron_list:
         for a in range(len(pron)):
@@ -51,7 +47,7 @@ def get_rhyme_classes(pron_list, syllable_trim):
                 rhyme_classes.append(rhyme_class)
     return rhyme_classes
 
-def build_database(db_file, syllable_trim=1):
+def build_database(db_file, syllable_trim=0):
     """
     Build the database from CMU dictionary
     """
@@ -109,6 +105,10 @@ def build_database(db_file, syllable_trim=1):
     return Session
 
 def connect_to_database(db_file):
+    """
+    Connect to a database and return Session
+    """
+
     # Connect to database
     print "Connecting with database..."
     engine = create_engine('sqlite:///' + db_file, echo=False)
@@ -120,9 +120,11 @@ def connect_to_database(db_file):
     return Session
 
 class RhymeDictionary(object):
+
     def __init__(self, Session, trim=2):
         self.Session = Session
         self.trim = trim
+
     def get_rhymes(self, word):
         session = self.Session()
         all_results = []
@@ -143,6 +145,7 @@ class RhymeDictionary(object):
                     all_results.append(rhyme_class_results)
         session.close()
         return all_results
+
     def random_rhyme(self, word):
         all_rhymes = self.get_rhymes(word)
         if all_rhymes:
@@ -151,12 +154,38 @@ class RhymeDictionary(object):
             return random_word
         else:
             return None
-    def rhyme_strength(self, left, right):
-        pass
+
+    def rhyme_strength(self, word_a, word_b):
+        session = self.Session()
+        word_a_object = session.query(Entry).filter(Entry.word==word_a).first()
+        word_b_object = session.query(Entry).filter(Entry.word==word_b).first()
+        all_results = []
+        max_rhyme_strength = 0
+        if word_a_object and word_b_object:
+            rhyme_classes = session.query(RhymeClass).filter(RhymeClass.word_matches.contains(word_a_object),
+                    RhymeClass.word_matches.contains(word_b_object)).all()
+            for rhyme_class in filter(lambda c: len(c.pron.split()) >= self.trim, sorted(rhyme_classes, key=lambda rhyme: len(rhyme.pron))):
+                max_rhyme_strength = max(max_rhyme_strength, len(rhyme_class.pron.split()))
+        session.close()
+        return max_rhyme_strength
+
+    @staticmethod
+    def last_vowel_index(pron):
+        """
+        Given pronuncation (separated into a list of phoneme strings), returns
+        reverse index of last syllable
+        """
+        pron.sort(reverse=True)
+        vowel_re = re.compile('.*[0-9].*')
+        for index, phone in enumerate(pron):
+            if vowel_re.search(phone):
+                return index
+        return None
 
 if __name__ == "__main__":
     db_file = sys.argv[1]
 
+    # If database doesn't exist, build it, otherwise connect
     if not os.path.isfile(db_file):
         Session = build_database(db_file)
     else:
@@ -164,8 +193,10 @@ if __name__ == "__main__":
 
     rhyme_dict = RhymeDictionary(Session, 0)
 
+    # Testing loop
     while True: 
-        word = str(raw_input("Enter a word to test (or /quit to exit): "))
-        print rhyme_dict.random_rhyme(word)
-        if word == "/quit":
+        first = str(raw_input("Enter first word to test (or /quit to exit): "))
+        if first == "/quit":
             break 
+        second = str(raw_input("Enter second word to test: "))
+        print rhyme_dict.rhyme_strength(first, second)
