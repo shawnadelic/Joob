@@ -28,7 +28,7 @@ class SongGenerator:
         except:
             pass
 
-def scan_song(lyric_file):
+def scan_song(lyric_file, rhyme_dict):
     nltk.download('punkt', quiet=True)
     end_words = []
     with open(lyric_file) as lyric_input:
@@ -44,15 +44,23 @@ def scan_song(lyric_file):
     size = len(end_words)
     matrix = [[0 for i in range(size)] for j in range(size)]
 
+    print end_words
+
     for row in range(size):
         for col in range(size):
-            matrix[col][row] = row + col
-
-    print matrix
+            score = 0
+            print "Before call"
+            if (col >= row):
+                score = rhyme_dict.rhyme_strength(end_words[row], end_words[col])
+            print "After call"
+            matrix[col][row] = score
+            print "%s" % score,
+        print
 
 
 if __name__ == "__main__":
     #rhymes = rhyme_dictionary.RhymeDictionary(db_file="test.db")
+    Session = rhyme_dictionary.connect_to_database('test2.db')
+    rhyme_dict = rhyme_dictionary.RhymeDictionary(Session, 0)
     song_generator = SongGenerator()
-    scan_song("data/003.txt")
-    scan_song("data/004.txt")
+    scan_song("data/003.txt", rhyme_dict)
