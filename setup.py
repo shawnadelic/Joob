@@ -40,7 +40,10 @@ config = {
     "extras_require": {
         "dev": ["check-manifest"],
         "test": ["pytest"]
-    }
+    },
+    "entry_points": {
+        "console_scripts": ["build_dict=joob.commands:build_dict"]
+    },
 }
 
 setup(**config)
