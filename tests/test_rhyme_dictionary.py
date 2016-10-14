@@ -15,3 +15,6 @@ class JoobClass(unittest.TestCase):
 # Test word with no other rhymes (beige)
 # Test word with numerous pronunciations (comically)
 # Test that words don't return themselves (jew)
+
+def test_rhyme_dictionary():
+    assert True

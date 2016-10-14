@@ -69,14 +69,14 @@ def build_database(db_file, syllable_trim=0):
     # Create SessionMaker
     Session = sessionmaker(bind=engine)
 
-    print "Building database..."
+    print("Building database...")
     Base.metadata.create_all(engine)
 
     # Open session
     session = Session()
 
     # Iterate through CMU dictionary and add entries to database
-    print "Adding words..."
+    print("Adding words...")
     for word, pron_list in cmu.dict().items():
         entry = Entry(word=word)
         entry_dict[word] = entry
@@ -89,7 +89,7 @@ def build_database(db_file, syllable_trim=0):
                 reverse_rhyme_dict[rhyme_class].append(word)
 
     # Iterate through reverse_rhyme_dict, connecting rhyme class to words
-    print "Adding rhyme classes..."
+    print("Adding rhyme classes...")
     for rhyme_class, word_list in reverse_rhyme_dict.items():
         pron = " ".join(rhyme_class)
         rhyme_class = RhymeClass(pron=pron)
@@ -110,7 +110,7 @@ def connect_to_database(db_file):
     """
 
     # Connect to database
-    print "Connecting with database..."
+    print("Connecting with database...")
     engine = create_engine('sqlite:///' + db_file, echo=False)
     engine.connect()
 
@@ -199,4 +199,4 @@ if __name__ == "__main__":
         if first == "/quit":
             break 
         second = str(raw_input("Enter second word to test: "))
-        print rhyme_dict.rhyme_strength(first, second)
+        print(rhyme_dict.rhyme_strength(first, second))
