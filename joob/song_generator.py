@@ -1,44 +1,52 @@
-import os
 import string
-import rhyme_dictionary
+
 import nltk
 from nltk.tokenize import word_tokenize
 
+import rhyme_dictionary
+
+
 class Song:
-    def __init__(self,title,songs):
+    def __init__(self, title, songs):
         self.title = title
         self.songs = songs
         self.lines = list()
+
     def __repr__(self):
         return self.title
+
 
 class SongGenerator:
     def __init__(self):
         self.songs = dict()
-        ##for filename in os.listdir("data"):
         filename = "001.txt"
         try:
             input_file = open("data/" + filename)
             title = input_file.readline().strip()
-            song_buffer = Song(title,self.songs)
+            song_buffer = Song(title, self.songs)
             for line in input_file:
-                song_buffer.lines.append([token for token in word_tokenize(line) if token not in string.punctuation])
+                song_buffer.lines.append([
+                    token for
+                    token in word_tokenize(line)
+                    if token not in string.punctuation])
                 self.songs[title] = song_buffer
-            print self.songs[title]
+            print(self.songs[title])
         except:
             pass
+
 
 def scan_song(lyric_file, rhyme_dict):
     nltk.download('punkt', quiet=True)
     end_words = []
     with open(lyric_file) as lyric_input:
-        song_title = lyric_input.readline()
         for line in lyric_input:
             if line:
-                end_word = [w.lower() for w in
-                        nltk.word_tokenize(line) if w.isalpha()]
+                end_word = [
+                    w.lower() for w in
+                    nltk.word_tokenize(line) if w.isalpha()]
                 if end_word:
-                    end_words.append([w.lower() for w in
+                    end_words.append([
+                        w.lower() for w in
                         nltk.word_tokenize(line) if w.isalpha()][-1])
 
     size = len(end_words)
@@ -51,7 +59,8 @@ def scan_song(lyric_file, rhyme_dict):
             score = 0
             print "Before call"
             if (col >= row):
-                score = rhyme_dict.rhyme_strength(end_words[row], end_words[col])
+                score = rhyme_dict.rhyme_strength(
+                    end_words[row], end_words[col])
             print "After call"
             matrix[col][row] = score
             print "%s" % score,
@@ -59,7 +68,6 @@ def scan_song(lyric_file, rhyme_dict):
 
 
 if __name__ == "__main__":
-    #rhymes = rhyme_dictionary.RhymeDictionary(db_file="test.db")
     Session = rhyme_dictionary.connect_to_database('test2.db')
     rhyme_dict = rhyme_dictionary.RhymeDictionary(Session, 0)
     song_generator = SongGenerator()

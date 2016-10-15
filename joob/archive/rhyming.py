@@ -1,5 +1,7 @@
-from nltk.corpus import cmudict as cmu
 import sys
+
+from nltk.corpus import cmudict as cmu
+
 
 def has_vowel(pron):
     matches = 0

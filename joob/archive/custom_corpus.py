@@ -1,11 +1,14 @@
 # Make sure that custom corpora are included in directory
+import os
+import os.path
+
+import nltk.data
 from nltk.corpus import PlaintextCorpusReader
-import os, os.path
+
 path = os.path.expanduser('~/nltk_data')
 if not os.path.exists(path):
     os.mkdir(path)
 os.path.exists(path)
-import nltk.data
 
 home_root = os.path.expanduser('~')
 corpus_directory = '/nltk_data/corpora/beatles/'

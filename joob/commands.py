@@ -1,5 +1,6 @@
-from joob.rhyme_dictionary import build_database, RhymeDictionary
+from joob.rhyme_dictionary import RhymeDictionary, build_database
+
 
 def build_dict():
     Session = build_database("test.db")
-    rhyme_dict = RhymeDictionary(Session, 0)
+    RhymeDictionary(Session, 0)

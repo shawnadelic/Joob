@@ -1,7 +1,10 @@
-import rhyming
-import math
 import collections
+import math
+
 from nltk.corpus import cmudict
+
+import rhyming
+
 
 class LWord:
     def get_word(self):

@@ -1,12 +1,14 @@
 # Import NLTK and relevant corpora
+import sys
+
 import nltk
 from nltk.corpus import cmudict as cmu
 from nltk.probability import FreqDist
-from nltk.tokenize import word_tokenize, wordpunct_tokenize, sent_tokenize
-import sys
+from nltk.tokenize import sent_tokenize, word_tokenize, wordpunct_tokenize
 
-from rhymes import rhymes
 import custom_corpus
+from rhymes import rhymes
+
 
 def tag_rhyme( line1, line2 ):
     print "Rhyme score for \"" + line1 + "\" and \"" + line2 + "\" is " + str(rhymes(line1,line2))

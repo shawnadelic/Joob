@@ -38,7 +38,7 @@ config = {
     "packages": ["joob"],
     "install_requires": ["nltk", "sqlalchemy"],
     "extras_require": {
-        "dev": ["check-manifest"],
+        "dev": ["flake8", "isort"],
         "test": ["pytest"]
     },
     "entry_points": {

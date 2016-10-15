@@ -1,6 +1,7 @@
-from bs4 import BeautifulSoup
-import requests
 import base64
+
+import requests
+from bs4 import BeautifulSoup
 
 song_directory = "songs"
 artist_name = "Beatles"

@@ -4,36 +4,60 @@
 #                                                                     #
 #######################################################################
 
-import random, nltk, sys, os, re
-from sqlalchemy import create_engine, Column, Integer, String, Table, ForeignKey
+import os
+import random
+import re
+import sys
+from collections import defaultdict
+
+import nltk
+from sqlalchemy import Column, ForeignKey, String, Table, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from collections import defaultdict
 
 # Setup ORM
 Base = declarative_base()
 
-ClassMatchTable = Table('ClassMatch', Base.metadata,
-    Column('rhyme_class_pron', String, ForeignKey('RhymeClass.pron'), primary_key=True),
-    Column('entry_word', String, ForeignKey('Entry.word'), primary_key=True))
+ClassMatchTable = Table(
+    'ClassMatch', Base.metadata,
+    Column(
+        'rhyme_class_pron',
+        String,
+        ForeignKey('RhymeClass.pron'),
+        primary_key=True
+    ),
+    Column(
+        'entry_word',
+        String,
+        ForeignKey('Entry.word'),
+        primary_key=True
+    )
+)
+
 
 class Entry(Base):
     __tablename__ = "Entry"
     word = Column(String, primary_key=True)
-    class_matches = relationship("RhymeClass", secondary=ClassMatchTable,
-        backref="Entry")
+    class_matches = relationship(
+        "RhymeClass", secondary=ClassMatchTable,
+        backref="Entry"
+    )
 
     def __repr__(self):
         return "<Entry(word='%s')>" % self.word
 
+
 class RhymeClass(Base):
     __tablename__ = "RhymeClass"
     pron = Column(String, primary_key=True)
-    word_matches = relationship("Entry", secondary=ClassMatchTable,
-            backref="RhymeClass")
+    word_matches = relationship(
+        "Entry", secondary=ClassMatchTable,
+        backref="RhymeClass"
+    )
 
     def __repr__(self):
         return "<RhymeClass(pron='%s')>" % self.pron
+
 
 def get_rhyme_classes(pron_list, syllable_trim):
     """
@@ -46,6 +70,7 @@ def get_rhyme_classes(pron_list, syllable_trim):
             if len(rhyme_class) > syllable_trim:
                 rhyme_classes.append(rhyme_class)
     return rhyme_classes
+
 
 def build_database(db_file, syllable_trim=0):
     """
@@ -101,8 +126,9 @@ def build_database(db_file, syllable_trim=0):
 
     # Commit changes to database
     session.commit()
-    
+
     return Session
+
 
 def connect_to_database(db_file):
     """
@@ -119,6 +145,7 @@ def connect_to_database(db_file):
 
     return Session
 
+
 class RhymeDictionary(object):
 
     def __init__(self, Session, trim=2):
@@ -128,12 +155,19 @@ class RhymeDictionary(object):
     def get_rhymes(self, word):
         session = self.Session()
         all_results = []
-        word_object = session.query(Entry).filter(Entry.word==word).first()
+        word_object = session.query(Entry).filter(Entry.word == word).first()
         if word_object:
-            rhyme_classes = session.query(RhymeClass).filter(RhymeClass.word_matches.contains(word_object)).all()
-            for rhyme_class in filter(lambda c: len(c.pron.split()) >= self.trim, sorted(rhyme_classes, key=lambda rhyme: len(rhyme.pron))):
+            rhyme_classes = session.query(RhymeClass).filter(
+                RhymeClass.word_matches.contains(word_object)
+            ).all()
+            for rhyme_class in filter(
+                lambda c: len(c.pron.split()) >= self.trim,
+                sorted(rhyme_classes, key=lambda rhyme: len(rhyme.pron))
+            ):
                 rhyme_class_results = []
-                word_matches = session.query(Entry).filter(Entry.class_matches.contains(rhyme_class))
+                word_matches = session.query(Entry).filter(
+                    Entry.class_matches.contains(rhyme_class)
+                )
                 rhyme_class_results.append(rhyme_class.pron)
                 word_results = []
                 for entry in word_matches:
@@ -157,15 +191,23 @@ class RhymeDictionary(object):
 
     def rhyme_strength(self, word_a, word_b):
         session = self.Session()
-        word_a_object = session.query(Entry).filter(Entry.word==word_a).first()
-        word_b_object = session.query(Entry).filter(Entry.word==word_b).first()
-        all_results = []
+        word_a_object = session.query(Entry).filter(
+            Entry.word == word_a
+        ).first()
+        word_b_object = session.query(Entry).filter(
+            Entry.word == word_b
+        ).first()
         max_rhyme_strength = 0
         if word_a_object and word_b_object:
-            rhyme_classes = session.query(RhymeClass).filter(RhymeClass.word_matches.contains(word_a_object),
-                    RhymeClass.word_matches.contains(word_b_object)).all()
-            for rhyme_class in filter(lambda c: len(c.pron.split()) >= self.trim, sorted(rhyme_classes, key=lambda rhyme: len(rhyme.pron))):
-                max_rhyme_strength = max(max_rhyme_strength, len(rhyme_class.pron.split()))
+            rhyme_classes = session.query(RhymeClass).filter(
+                RhymeClass.word_matches.contains(word_a_object),
+                RhymeClass.word_matches.contains(word_b_object)
+            ).all()
+            for rhyme_class in filter(
+                    lambda c: len(c.pron.split()) >= self.trim,
+                    sorted(rhyme_classes, key=lambda rhyme: len(rhyme.pron))):
+                max_rhyme_strength = max(
+                    max_rhyme_strength, len(rhyme_class.pron.split()))
         session.close()
         return max_rhyme_strength
 
@@ -182,6 +224,7 @@ class RhymeDictionary(object):
                 return index
         return None
 
+
 if __name__ == "__main__":
     db_file = sys.argv[1]
 
@@ -194,9 +237,9 @@ if __name__ == "__main__":
     rhyme_dict = RhymeDictionary(Session, 0)
 
     # Testing loop
-    while True: 
+    while True:
         first = str(raw_input("Enter first word to test (or /quit to exit): "))
         if first == "/quit":
-            break 
+            break
         second = str(raw_input("Enter second word to test: "))
-        print(rhyme_dict.rhyme_strength(first, second))
+        int(rhyme_dict.rhyme_strength(first, second))
