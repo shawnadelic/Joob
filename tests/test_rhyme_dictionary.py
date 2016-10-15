@@ -1,13 +1,12 @@
 import os
 import unittest
-from joob.rhyme_dictionary import RhymeDictionary
+from joob.rhyme_dictionary import connect_to_database, RhymeDictionary
 
-class JoobClass(unittest.TestCase):
-    def test_init(self):
-        self.rhyme_dict = RhymeDictionary("test.db")
-        self.assertEqual(self.rhyme_dict.a, "No")
-    def test_one(self):
-        self.assertEqual(self,self)
+class TestClass(object):
+    def test_rhyme_strength(self):
+        Session = connect_to_database("test.db")
+        rhyme_dict = RhymeDictionary(Session, 0)
+        assert rhyme_dict.rhyme_strength("test", "blessed") > 0
 
 # Tests
 # beige - Valid word with no rhymes
@@ -15,6 +14,3 @@ class JoobClass(unittest.TestCase):
 # Test word with no other rhymes (beige)
 # Test word with numerous pronunciations (comically)
 # Test that words don't return themselves (jew)
-
-def test_rhyme_dictionary():
-    assert True
