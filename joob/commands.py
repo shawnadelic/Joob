@@ -1,6 +1,8 @@
 import argparse
 
-from joob.rhyme_dictionary import build_database
+from joob.rhyme_dictionary import (
+    build_database, connect_to_database, RhymeDictionary
+)
 
 
 DEFAULT_DATABASE = "db.sqlite3"
@@ -32,7 +34,14 @@ def generate_song():
     args = parser.parse_args()
     database = args.db or DEFAULT_DATABASE
     filename = args.file
+
+    # Connect to the database
+    session = connect_to_database(database)
+    rhyme_dict = RhymeDictionary(session, 2)
+
     print("Generating a song...")
+    with open(filename, "wb") as output_file:
+        output_file.write(rhyme_dict.random_rhyme("lips"))
 
 
 def train():
@@ -44,4 +53,9 @@ def train():
     args = parser.parse_args()
     database = args.db or DEFAULT_DATABASE
     directory = args.dir
+
+    # Connect to the database
+    session = connect_to_database(database)
+    rhyme_dict = RhymeDictionary(session, 2)
+
     print("Training...")
