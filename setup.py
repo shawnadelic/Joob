@@ -43,7 +43,9 @@ config = {
     },
     "entry_points": {
         "console_scripts": [
-            "build_dict=joob.commands:build_dict"
+            "build_dict=joob.commands:build_dict",
+            "generate_song=joob.commands:generate_song",
+            "train=joob.commands:train",
         ]
     },
 }
