@@ -77,6 +77,9 @@ def build_database(db_file, syllable_trim=0):
     Build the database from CMU dictionary
     """
 
+    if os.path.isfile(db_file):
+        raise DatabaseExistsException
+
     # Download correct corpus, if not already downloaded
     nltk.download('cmudict', quiet=False)
     cmu = nltk.corpus.cmudict
@@ -243,3 +246,7 @@ if __name__ == "__main__":
             break
         second = str(raw_input("Enter second word to test: "))
         int(rhyme_dict.rhyme_strength(first, second))
+
+
+class DatabaseExistsException(Exception):
+    pass
