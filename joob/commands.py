@@ -1,16 +1,22 @@
 import argparse
+import glob
 
 from joob.rhyme_dictionary import (
-    build_database, connect_to_database, RhymeDictionary
+    build_database, DatabaseExistsException, connect_to_database, RhymeDictionary
 )
 
 
 DEFAULT_DATABASE = "db.sqlite3"
 
 
-def build_dict():
+def get_base_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--db", help="Filename for sqlite3 database")
+    return parser
+
+
+def build_dict():
+    parser = get_base_parser()
     parser.add_argument("--trim",
                         help="Trim level for generating rhyme phonemes",
                         type=int)
@@ -21,13 +27,15 @@ def build_dict():
     trim = args.trim or 2
 
     # Build database
-    print("Building database %s" % database)
-    build_database(database, trim)
+    print("Building database %s..." % database)
+    try:
+        build_database(database, trim)
+    except DatabaseExistsException:
+        print("Database already exists!")
 
 
 def generate_song():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--db", help="Filename for sqlite3 database")
+    parser = get_base_parser()
     parser.add_argument("file", help="Output file")
 
     # Get arguments or set to defaults
@@ -45,8 +53,7 @@ def generate_song():
 
 
 def train():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--db", help="Filename for sqlite3 database")
+    parser = get_base_parser()
     parser.add_argument("dir", help="Input directory")
 
     # Get arguments or set to defaults
@@ -59,3 +66,11 @@ def train():
     rhyme_dict = RhymeDictionary(session, 2)
 
     print("Training...")
+
+    # Get all files within directory
+    files = glob.glob("joob/%s/*" % directory)
+
+    for filename in files:
+        with open(filename, "rb") as training_file:
+            for line in training_file.readlines():
+                print(line.rstrip())
