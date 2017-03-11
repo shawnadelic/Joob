@@ -15,8 +15,17 @@ Installation:
 
 4. Use pip to install application
 
-        pip install -e.[everything]
+        pip install -e.[dev]
+        pip install -e.[testing]
 
 5. Once installed, run command to build rhyme dictionary
 
         build_dict
+
+6. The following command generates a song
+
+        generate_song output.txt
+
+7. The following command trains on data
+
+        train path/to/data
