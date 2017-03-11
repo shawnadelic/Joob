@@ -34,6 +34,13 @@ class SongGenerator:
         except:
             pass
 
+    def train(self, data):
+        pass
+
+    def generate(self, mock=True):
+        if mock:
+            return "TEST MOCK STRING"
+
 
 def scan_song(lyric_file, rhyme_dict):
     nltk.download('punkt', quiet=True)

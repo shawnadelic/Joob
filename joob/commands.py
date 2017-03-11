@@ -4,7 +4,7 @@ import glob
 from joob.rhyme_dictionary import (
     build_database, DatabaseExistsException, connect_to_database, RhymeDictionary
 )
-
+from joob.song_generator import SongGenerator
 
 DEFAULT_DATABASE = "db.sqlite3"
 
@@ -38,6 +38,8 @@ def generate_song():
     parser = get_base_parser()
     parser.add_argument("file", help="Output file")
 
+    song_gen = SongGenerator()
+
     # Get arguments or set to defaults
     args = parser.parse_args()
     database = args.db or DEFAULT_DATABASE
@@ -49,7 +51,7 @@ def generate_song():
 
     print("Generating a song...")
     with open(filename, "wb") as output_file:
-        output_file.write(rhyme_dict.random_rhyme("lips"))
+        output_file.write(song_gen.generate(mock=True))
 
 
 def train():
