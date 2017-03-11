@@ -5,6 +5,7 @@ from joob.rhyme_dictionary import connect_to_database, RhymeDictionary
 
 def get_rhyme_dict():
     Session = connect_to_database("test.db")
+    assert Session
     return RhymeDictionary(Session, 0)
 
 

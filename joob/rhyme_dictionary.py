@@ -137,6 +137,8 @@ def connect_to_database(db_file):
     """
     Connect to a database and return Session
     """
+    if not os.path.isfile(db_file):
+        return None
 
     # Connect to database
     print("Connecting with database...")
