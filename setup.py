@@ -48,6 +48,8 @@ config = {
             "train=joob.commands:train",
         ]
     },
+
+    "test_suite": "tests",
 }
 
 setup(**config)
