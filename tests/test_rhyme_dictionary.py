@@ -1,3 +1,5 @@
+import unittest
+
 from joob.rhyme_dictionary import connect_to_database, RhymeDictionary
 
 
@@ -6,7 +8,7 @@ def get_rhyme_dict():
     return RhymeDictionary(Session, 0)
 
 
-class TestClass(object):
+class RhymeDictionaryTests(unittest.TestCase):
     def test_rhyme_strength(self):
         rhyme_dict = get_rhyme_dict()
         assert rhyme_dict.rhyme_strength("test", "blessed") > 0

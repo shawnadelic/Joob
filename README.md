@@ -29,3 +29,8 @@ Installation:
 7. The following command trains on data
 
         train path/to/data
+
+8. The following command runs the tests (requires test.db
+   to be generated in main directory).
+
+        python setup.py test
