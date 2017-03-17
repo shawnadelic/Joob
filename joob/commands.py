@@ -24,7 +24,7 @@ def build_dict():
     # Get arguments or set to defaults
     args = parser.parse_args()
     database = args.db or DEFAULT_DATABASE
-    trim = args.trim or 2
+    trim = args.trim or 0
 
     # Build database
     print("Building database %s..." % database)

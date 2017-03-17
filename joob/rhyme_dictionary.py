@@ -247,7 +247,9 @@ if __name__ == "__main__":
         if first == "/quit":
             break
         second = str(raw_input("Enter second word to test: "))
-        int(rhyme_dict.rhyme_strength(first, second))
+        print("Rhyme strength: {}".format(int(rhyme_dict.rhyme_strength(first, second))))
+
+    print("Quitting.")
 
 
 class DatabaseExistsException(Exception):
