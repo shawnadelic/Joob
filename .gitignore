@@ -16,4 +16,4 @@ __pycache__/
 venv
 
 joob/songs/*
-joob/training.pickle
+*.pickle

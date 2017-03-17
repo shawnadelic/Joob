@@ -1,4 +1,5 @@
 import pickle
+import random
 import string
 
 import nltk
@@ -21,7 +22,7 @@ class SongGenerator:
     def __init__(self):
         self.songs = dict()
         self.data = None
-        self.training_dimensions = (100, 100)
+        self.training_dimensions = (2, 3)
         filename = "001.txt"
         try:
             input_file = open("data/" + filename)
@@ -39,27 +40,39 @@ class SongGenerator:
 
         self.read_training_data()
 
-    def train(self, data):
-        pass
+    def train(self, pickle_file_path):
+        print("RESULTS: {}".format(self.read_pickle_file(pickle_file_path)))
 
-    def initialize_training_file(self, training_file):
-        height, weight = self.training_dimensions
-        self.data = [[1 for _ in range(weight)] for _ in range(height)]
-        pickle.dump(self.data, training_file, pickle.HIGHEST_PROTOCOL)
+    def write_pickle_file(self, data, pickle_file_path):
+        with open(pickle_file_path, "wb") as pickle_file:
+            pickle.dump(data, pickle_file, pickle.HIGHEST_PROTOCOL)
+
+    def read_pickle_file(self, pickle_file_path):
+        with open(pickle_file_path, "r") as pickle_file:
+            return pickle.load(pickle_file)
+
+    def get_initialized_array(self, start=1, end=1):
+        width, height = self.training_dimensions
+        return [[random.randint(start, end) for _ in range(width)]
+                for _ in range(height)]
+
+    def initialize_training_file(self, training_file_path):
+        self.data = self.get_initialized_array(start=1, end=1)
+        self.write_pickle_file(self.data, training_file_path)
 
     def read_training_data(self):
         self.data = None
         training_file_path = "joob/training.pickle"
         try:
-            with open(training_file_path, "r") as training_file:
-                self.data = pickle.load(training_file)
-        except IOError:
+            self.data = self.read_pickle_file(training_file_path)
+        except (EOFError, IOError):
             print("Couldn't find training file, generating file at {}".format(
                 training_file_path))
 
         if self.data is None:
-            with open(training_file_path, "wb") as training_file:
-                self.initialize_training_file(training_file)
+            self.initialize_training_file(training_file_path)
+            print("Generated initial pickle file {}...".format(
+                str(self.data)[:100]))
         else:
             print("Loaded {}...".format(str(self.data)[:100]))
 
@@ -104,4 +117,4 @@ if __name__ == "__main__":
     Session = rhyme_dictionary.connect_to_database('test2.db')
     rhyme_dict = rhyme_dictionary.RhymeDictionary(Session, 0)
     song_generator = SongGenerator()
-    scan_song("data/003.txt", rhyme_dict)
+    #scan_song("data/003.txt", rhyme_dict)

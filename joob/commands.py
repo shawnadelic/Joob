@@ -54,7 +54,7 @@ def generate_song():
         output_file.write(song_gen.generate(mock=True))
 
 
-def train():
+def train_old():
     parser = get_base_parser()
     parser.add_argument("dir", help="Input directory")
 
@@ -72,9 +72,35 @@ def train():
     # Get all files within directory
     files = glob.glob("joob/%s/*" % directory)
 
+    # Initialize song generator
+    song_gen = SongGenerator()
+
     for filename in files:
         with open(filename, "rb") as training_file:
             for line in training_file.readlines():
                 print(line.rstrip())
 
+def train():
+    parser = get_base_parser()
+    parser.add_argument("pickle_file_path", help="Pickle file")
+    parser.add_argument("--random", dest="random", action="store_true", default=False)
+
+    args = parser.parse_args()
+
+    print("Training...")
+
     song_gen = SongGenerator()
+    if args.random:
+        try:
+            data = song_gen.get_initialized_array(start=1,end=100)
+            print("Generating random pickle file {}: {}".format(args.pickle_file_path, data))
+            song_gen.write_pickle_file(data, args.pickle_file_path)
+        except Exception as e:
+            print("Exception: {}".format(e))
+    if not args.random:
+        try:
+            data = song_gen.read_pickle_file(args.pickle_file_path)
+            print("Loading data from pickle_file: {}".format(args.pickle_file_path))
+            print("Results: {}".format(data))
+        except IOError:
+            print("Error: File might not exist?")
