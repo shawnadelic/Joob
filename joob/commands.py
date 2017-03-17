@@ -76,3 +76,5 @@ def train():
         with open(filename, "rb") as training_file:
             for line in training_file.readlines():
                 print(line.rstrip())
+
+    song_gen = SongGenerator()

@@ -1,3 +1,4 @@
+import pickle
 import string
 
 import nltk
@@ -19,6 +20,8 @@ class Song:
 class SongGenerator:
     def __init__(self):
         self.songs = dict()
+        self.data = None
+        self.training_dimensions = (100, 100)
         filename = "001.txt"
         try:
             input_file = open("data/" + filename)
@@ -34,8 +37,31 @@ class SongGenerator:
         except:
             pass
 
+        self.read_training_data()
+
     def train(self, data):
         pass
+
+    def initialize_training_file(self, training_file):
+        height, weight = self.training_dimensions
+        self.data = [[1 for _ in range(weight)] for _ in range(height)]
+        pickle.dump(self.data, training_file, pickle.HIGHEST_PROTOCOL)
+
+    def read_training_data(self):
+        self.data = None
+        training_file_path = "joob/training.pickle"
+        try:
+            with open(training_file_path, "r") as training_file:
+                self.data = pickle.load(training_file)
+        except IOError:
+            print("Couldn't find training file, generating file at {}".format(
+                training_file_path))
+
+        if self.data is None:
+            with open(training_file_path, "wb") as training_file:
+                self.initialize_training_file(training_file)
+        else:
+            print("Loaded {}...".format(str(self.data)[:100]))
 
     def generate(self, mock=True):
         if mock:
